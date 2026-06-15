@@ -6,6 +6,7 @@ import { ApiConfig } from '@/components/ApiConfig';
 import { TranslateButton } from '@/components/TranslateButton';
 import { ProgressBar } from '@/components/ProgressBar';
 import { useTranslation } from '@/hooks/useTranslation';
+import { openPdfDialog } from '@/services/pdf';
 import type { PdfFile, TranslationDirection, ApiConfig as ApiConfigType } from '@/types';
 
 function App() {
@@ -25,12 +26,21 @@ function App() {
     reset,
   } = useTranslation();
 
-  const handleFileSelect = (file: PdfFile) => {
-    setSelectedFile(file);
+  const handleFileSelect = async (file: PdfFile) => {
+    const path = await openPdfDialog();
+    if (path) {
+      setSelectedFile({
+        ...file,
+        path,
+        pageCount: 0,
+      });
+    }
   };
 
   const handleTranslate = () => {
-    startTranslation();
+    if (selectedFile) {
+      startTranslation(selectedFile, direction, apiConfig);
+    }
   };
 
   const handleReset = () => {
