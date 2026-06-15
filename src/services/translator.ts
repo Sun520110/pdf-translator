@@ -19,7 +19,7 @@ export async function translateText(
   } else if (api === 'deepl') {
     return translateWithDeepl(texts, apiKey, targetLang);
   } else {
-    return translateWithBaidu(texts, apiKey, direction);
+    return translateWithBaidu(direction);
   }
 }
 
@@ -78,11 +78,10 @@ async function translateWithDeepl(
 }
 
 async function translateWithBaidu(
-  texts: string[],
-  _apiKey: string,
-  direction: TranslationDirection
+  _direction: TranslationDirection
 ): Promise<string[]> {
   // 百度翻译需要APP ID和密钥，这里简化处理
   // 实际使用时需要添加签名验证
+  void _direction;
   throw new Error('百度翻译需要配置APP ID，当前版本仅支持Google和DeepL');
 }

@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import type { TranslationStatus, PdfFile, TranslationDirection, ApiConfig } from '@/types';
-import { openPdfDialog, getPdfInfo, extractPdfText } from '@/services/pdf';
+import { getPdfInfo, extractPdfText } from '@/services/pdf';
 import { translateText } from '@/services/translator';
 
 export function useTranslation() {
@@ -24,7 +24,7 @@ export function useTranslation() {
     try {
       // 获取PDF信息
       setProgress({ current: 5, total: 100 });
-      const pdfInfo = await getPdfInfo(file.path);
+      await getPdfInfo(file.path);
       
       // 提取PDF文本
       setProgress({ current: 10, total: 100 });
