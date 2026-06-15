@@ -2,11 +2,16 @@ import { useState } from 'react';
 import { DropZone } from '@/components/DropZone';
 import { FileInfo } from '@/components/FileInfo';
 import { DirectionToggle } from '@/components/DirectionToggle';
-import type { PdfFile, TranslationDirection } from '@/types';
+import { ApiConfig } from '@/components/ApiConfig';
+import type { PdfFile, TranslationDirection, ApiConfig as ApiConfigType } from '@/types';
 
 function App() {
   const [selectedFile, setSelectedFile] = useState<PdfFile | null>(null);
   const [direction, setDirection] = useState<TranslationDirection>('zh-en');
+  const [apiConfig, setApiConfig] = useState<ApiConfigType>({
+    provider: 'google',
+    apiKey: '',
+  });
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-8">
@@ -16,14 +21,16 @@ function App() {
         {!selectedFile ? (
           <DropZone onFileSelect={setSelectedFile} />
         ) : (
-          <>
+          <div className="space-y-6">
             <FileInfo file={selectedFile} />
             
-            <div className="mt-6">
+            <div>
               <p className="text-sm font-medium text-gray-500 mb-2 text-center">翻译方向</p>
               <DirectionToggle value={direction} onChange={setDirection} />
             </div>
-          </>
+
+            <ApiConfig value={apiConfig} onChange={setApiConfig} />
+          </div>
         )}
       </div>
     </div>
