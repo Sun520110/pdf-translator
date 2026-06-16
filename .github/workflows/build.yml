@@ -37,21 +37,19 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: List build outputs
-        shell: bash
+      - name: Upload artifacts
         run: |
-          echo "=== Build outputs ==="
-          find src-tauri/target/release -type f \( -name "*.exe" -o -name "*.msi" -o -name "*.dll" \) 2>/dev/null | head -30
-          echo "=== Bundle folder ==="
-          ls -laR src-tauri/target/release/bundle/ 2>/dev/null | head -50
+          echo "=== Looking for build outputs ==="
+          dir src-tauri/target/release /s /b 2>nul | findstr /i "\.exe \.msi" | head -20
+          echo "=== Checking bundle ==="
+          dir src-tauri\target\release\bundle /s /b 2>nul
+        shell: cmd
 
-      - name: Upload all executables
+      - name: Upload to GitHub
         uses: actions/upload-artifact@v4
         with:
-          name: pdf-translator-windows
-          path: |
-            src-tauri/target/release/bundle/
-            src-tauri/target/release/*.exe
+          name: pdf-translator-windows-bundle
+          path: src-tauri/target/release/bundle
 
   build-linux:
     runs-on: ubuntu-22.04
@@ -89,19 +87,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: List build outputs
-        shell: bash
+      - name: Upload artifacts
         run: |
-          echo "=== Build outputs ==="
-          find src-tauri/target/release -type f \( -name "*.AppImage" -o -name "pdf-translator" \) 2>/dev/null | head -30
+          echo "=== Looking for build outputs ==="
+          find src-tauri/target/release -type f \( -name "*.AppImage" -o -name "pdf-translator" \) 2>/dev/null || true
           echo "=== Bundle folder ==="
-          ls -laR src-tauri/target/release/bundle/ 2>/dev/null | head -50
+          ls -la src-tauri/target/release/bundle/ 2>/dev/null || true
+        shell: bash
 
-      - name: Upload all executables
+      - name: Upload to GitHub
         uses: actions/upload-artifact@v4
         with:
-          name: pdf-translator-linux
-          path: |
-            src-tauri/target/release/bundle/
-            src-tauri/target/release/pdf-translator
-            src-tauri/target/release/*.AppImage
+          name: pdf-translator-linux-bundle
+          path: src-tauri/target/release/bundle
