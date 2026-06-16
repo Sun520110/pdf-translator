@@ -6,6 +6,78 @@ on:
   workflow_dispatch:
 
 jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Build Tauri app
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Find and upload artifacts
+        shell: bash
+        run: |
+          echo "=== Checking build output ==="
+          find src-tauri/target/release -name "*.exe" -o -name "*.msi" -o -name "*.msm" 2>/dev/null | head -20
+          echo "=== Checking bundle folder ==="
+          ls -la src-tauri/target/release/bundle/ 2>/dev/null || echo "No bundle folder"
+          ls -la src-tauri/target/release/bundle/*/ 2>/dev/null || echo "No subfolders"
+          
+          # Upload executable
+          if [ -f "src-tauri/target/release/pdf_translator.exe" ]; then
+            echo "Found executable, uploading..."
+            cp src-tauri/target/release/pdf_translator.exe ./pdf-translator.exe
+          elif [ -f "src-tauri/target/release/PDF Translator.exe" ]; then
+            cp "src-tauri/target/release/PDF Translator.exe" ./pdf-translator.exe
+          fi
+          
+          # Check for MSI
+          if [ -d "src-tauri/target/release/bundle/msi" ]; then
+            cp src-tauri/target/release/bundle/msi/*.msi . 2>/dev/null || true
+          fi
+          
+          # Check for NSIS
+          if [ -d "src-tauri/target/release/bundle/nsis" ]; then
+            cp src-tauri/target/release/bundle/nsis/*.exe . 2>/dev/null || true
+          fi
+          
+          ls -la *.exe *.msi 2>/dev/null || echo "No artifacts found"
+
+      - name: Upload Windows executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: pdf-translator-windows
+          path: |
+            src-tauri/target/release/pdf_translator.exe
+            src-tauri/target/release/PDF Translator.exe
+            src-tauri/target/release/bundle/msi/*.msi
+            src-tauri/target/release/bundle/nsis/*.exe
+            *.exe
+            *.msi
+
   build-linux:
     runs-on: ubuntu-22.04
     steps:
@@ -42,85 +114,28 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload Linux build
+      - name: Find and upload artifacts
+        shell: bash
+        run: |
+          echo "=== Checking build output ==="
+          find src-tauri/target/release -name "*.AppImage" -o -name "pdf-translator" 2>/dev/null | head -10
+          ls -la src-tauri/target/release/bundle/ 2>/dev/null || echo "No bundle folder"
+          
+          # Upload executable
+          if [ -f "src-tauri/target/release/pdf-translator" ]; then
+            cp src-tauri/target/release/pdf-translator ./pdf-translator
+          fi
+          
+          # Check for AppImage
+          if [ -d "src-tauri/target/release/bundle/appimage" ]; then
+            cp src-tauri/target/release/bundle/appimage/*.AppImage . 2>/dev/null || true
+          fi
+
+      - name: Upload Linux executable
         uses: actions/upload-artifact@v4
         with:
           name: pdf-translator-linux
-          path: src-tauri/target/release/bundle/deb/*.deb
-
-  build-macos:
-    runs-on: macos-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Install macOS dependencies
-        run: brew installwebkitgtk
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Rust cache
-        uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: './src-tauri -> target'
-
-      - name: Install frontend dependencies
-        run: npm ci
-
-      - name: Build frontend
-        run: npm run build
-
-      - name: Build Tauri app
-        uses: tauri-apps/tauri-action@v0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload macOS build
-        uses: actions/upload-artifact@v4
-        with:
-          name: pdf-translator-macos
-          path: src-tauri/target/release/bundle/dmg/*.dmg
-
-  build-windows:
-    runs-on: windows-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Rust cache
-        uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: './src-tauri -> target'
-
-      - name: Install frontend dependencies
-        run: npm ci
-
-      - name: Build frontend
-        run: npm run build
-
-      - name: Build Tauri app
-        uses: tauri-apps/tauri-action@v0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload Windows build
-        uses: actions/upload-artifact@v4
-        with:
-          name: pdf-translator-windows
-          path: src-tauri/target/release/bundle/msi/*.msi
+          path: |
+            src-tauri/target/release/pdf-translator
+            src-tauri/target/release/bundle/appimage/*.AppImage
+            *.AppImage
