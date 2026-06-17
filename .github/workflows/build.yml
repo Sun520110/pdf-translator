@@ -36,6 +36,12 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: v__VERSION__
+          releaseName: 'PDF Translator v__VERSION__'
+          releaseBody: 'PDF Translator Desktop Application'
+          releaseDraft: false
+          prerelease: false
 
   build-linux:
     runs-on: ubuntu-22.04
@@ -72,3 +78,9 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: v__VERSION__
+          releaseName: 'PDF Translator v__VERSION__'
+          releaseBody: 'PDF Translator Desktop Application'
+          releaseDraft: false
+          prerelease: false
