@@ -32,16 +32,10 @@ jobs:
       - name: Build frontend
         run: npm run build
 
-      - name: Build Tauri app
+      - name: Build and Release Tauri app
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload NSIS installer
-        uses: actions/upload-artifact@v4
-        with:
-          name: pdf-translator-windows-setup
-          path: src-tauri/target/release/bundle/nsis/
 
   build-linux:
     runs-on: ubuntu-22.04
@@ -74,13 +68,7 @@ jobs:
       - name: Build frontend
         run: npm run build
 
-      - name: Build Tauri app
+      - name: Build and Release Tauri app
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload AppImage
-        uses: actions/upload-artifact@v4
-        with:
-          name: pdf-translator-linux-appimage
-          path: src-tauri/target/release/bundle/appimage/
