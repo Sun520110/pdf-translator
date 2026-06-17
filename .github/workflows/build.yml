@@ -37,19 +37,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload artifacts
-        run: |
-          echo "=== Looking for build outputs ==="
-          dir src-tauri/target/release /s /b 2>nul | findstr /i "\.exe \.msi" | head -20
-          echo "=== Checking bundle ==="
-          dir src-tauri\target\release\bundle /s /b 2>nul
-        shell: cmd
-
-      - name: Upload to GitHub
+      - name: Upload bundle
         uses: actions/upload-artifact@v4
         with:
-          name: pdf-translator-windows-bundle
-          path: src-tauri/target/release/bundle
+          name: pdf-translator-windows
+          path: src-tauri/target/release/bundle/
 
   build-linux:
     runs-on: ubuntu-22.04
@@ -87,16 +79,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload artifacts
-        run: |
-          echo "=== Looking for build outputs ==="
-          find src-tauri/target/release -type f \( -name "*.AppImage" -o -name "pdf-translator" \) 2>/dev/null || true
-          echo "=== Bundle folder ==="
-          ls -la src-tauri/target/release/bundle/ 2>/dev/null || true
-        shell: bash
-
-      - name: Upload to GitHub
+      - name: Upload bundle
         uses: actions/upload-artifact@v4
         with:
-          name: pdf-translator-linux-bundle
-          path: src-tauri/target/release/bundle
+          name: pdf-translator-linux
+          path: src-tauri/target/release/bundle/
