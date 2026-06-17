@@ -3,6 +3,8 @@ name: Build Tauri App
 on:
   push:
     branches: [main]
+    tags:
+      - 'v*'
   workflow_dispatch:
 
 jobs:
@@ -32,16 +34,10 @@ jobs:
       - name: Build frontend
         run: npm run build
 
-      - name: Build and Release Tauri app
+      - name: Build Tauri app
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tagName: v__VERSION__
-          releaseName: 'PDF Translator v__VERSION__'
-          releaseBody: 'PDF Translator Desktop Application'
-          releaseDraft: false
-          prerelease: false
 
   build-linux:
     runs-on: ubuntu-22.04
@@ -74,13 +70,7 @@ jobs:
       - name: Build frontend
         run: npm run build
 
-      - name: Build and Release Tauri app
+      - name: Build Tauri app
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tagName: v__VERSION__
-          releaseName: 'PDF Translator v__VERSION__'
-          releaseBody: 'PDF Translator Desktop Application'
-          releaseDraft: false
-          prerelease: false
